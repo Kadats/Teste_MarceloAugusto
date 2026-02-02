@@ -73,3 +73,21 @@
     * **Decisão:** Substituir esses valores `NaN` por `0.0`.
     * **Justificativa:** Para fins de exibição no Frontend e armazenamento no Banco de Dados, `0.0` representa corretamente que "não houve variação registrada", evitando erros de tipagem ou valores nulos que quebrariam a interface.
 
+### 5. Banco de Dados e Persistência
+
+* **Escolha do SGBD:**
+    * **Tecnologia:** PostgreSQL 15 (via Docker).
+    * **Justificativa:** O PostgreSQL é robusto, suporta nativamente tipos numéricos precisos (`NUMERIC`) para dados financeiros e possui excelente integração com Python/SQLAlchemy.
+    * **Infraestrutura:** Utilizei o **Docker Compose** para orquestrar o banco. Isso garante que qualquer pessoa que clone o repositório consiga subir o ambiente com um único comando (`docker compose up`), sem precisar instalar o Postgres localmente no sistema operacional, mantendo o ambiente de desenvolvimento limpo.
+
+* **Estratégia de Carga de Dados (Data Loading):**
+    * **Trade-off: Full Refresh vs. Incremental:**
+        * Optei pela estratégia de **Carga Total (Full Refresh)** com `TRUNCATE` antes da inserção.
+        * **Justificativa:** Para o escopo deste teste, garantir a consistência e a idempotência (poder rodar o script várias vezes e ter o mesmo resultado) é prioritário. Uma carga incremental exigiria verificação linha a linha (Upsert), o que adicionaria complexidade de processamento desnecessária dado o volume de dados (~170k registros).
+
+* **Modelagem:**
+    * Criei três tabelas para atender aos requisitos:
+        1.  `operadoras`: Tabela dimensional (Dados cadastrais únicos).
+        2.  `despesas_detalhadas`: Tabela de fatos (Transações linha a linha).
+        3.  `despesas_agregadas`: Tabela de performance (Pré-calculada para consultas rápidas de Dashboards).
+
