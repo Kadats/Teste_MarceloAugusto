@@ -47,3 +47,19 @@
     * **Problema:** Os arquivos de Demonstrações Contábeis da ANS (fonte 1.1) **não contêm** as colunas `CNPJ` ou `Razão Social`, apenas o código `REG_ANS`.
     * **Solução Adotada:** Para manter a integridade do teste, realizei a consolidação mantendo a coluna `RegistroANS`.
     * **Próximo Passo:** O enriquecimento com CNPJ e Razão Social será feito na etapa 2.2, através do cruzamento (Join) com a base de Dados Cadastrais das Operadoras.
+
+### 3. Transformação e Enriquecimento de Dados
+
+* **Estratégia de Join (Desafio Técnico):**
+    * O PDF solicita o cruzamento por `CNPJ`. No entanto, como a fonte primária (Demonstrações Contábeis) não possui CNPJ, utilizei o `RegistroANS` (código único da operadora) como chave de ligação (`Join Key`).
+    * Identifiquei e tratei divergências de tipagem (`int` vs `string`) e nomes de colunas dinâmicos (`REGISTRO_OPERADORA` vs `DATA_REGISTRO`) através de inspeção automática.
+
+* **Validação e Tratamento de Qualidade (Data Quality):**
+    * **Validação:** Implementei o algoritmo de *Módulo 11* para verificar a validade matemática dos CNPJs após o enriquecimento.
+    * **Estratégia de "Quarentena" (Trade-off):**
+        * *Decisão:* Ao invés de descartar registros com CNPJs inválidos ou sem correspondência no cadastro, optei por **separar os dados**.
+        * *Fluxo:*
+            * ✅ Dados Válidos -> `data/processed/despesas_enriquecidas.csv` (Seguem para análise).
+            * ❌ Dados Inválidos -> `data/processed/inconsistencias.csv` (Seguem para auditoria).
+        * *Justificativa:* Em um contexto financeiro, descartar despesas apenas por erro cadastral geraria relatórios contábeis imprecisos (falso positivo de lucro). A segregação permite a continuidade da análise sem perder o rastro das inconsistências.
+
