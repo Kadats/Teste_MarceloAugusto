@@ -63,3 +63,13 @@
             * ❌ Dados Inválidos -> `data/processed/inconsistencias.csv` (Seguem para auditoria).
         * *Justificativa:* Em um contexto financeiro, descartar despesas apenas por erro cadastral geraria relatórios contábeis imprecisos (falso positivo de lucro). A segregação permite a continuidade da análise sem perder o rastro das inconsistências.
 
+### 4. Agregação e Análise Estatística
+
+* **Granularidade:**
+    * A agregação foi realizada em dois níveis: primeiro somando as despesas por trimestre (visão temporal), e posteriormente calculando a média e desvio padrão por operadora (visão consolidada).
+
+* **Tratamento de Desvio Padrão (Trade-off Matemático):**
+    * **Problema:** Operadoras que possuem registro em apenas um trimestre resultam em `NaN` (Not a Number) ao calcular o desvio padrão (pois não há variância com um único ponto de dados).
+    * **Decisão:** Substituir esses valores `NaN` por `0.0`.
+    * **Justificativa:** Para fins de exibição no Frontend e armazenamento no Banco de Dados, `0.0` representa corretamente que "não houve variação registrada", evitando erros de tipagem ou valores nulos que quebrariam a interface.
+
