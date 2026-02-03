@@ -100,3 +100,21 @@
         2.  **Agregações:** Uso de `SUM`, `AVG`, `COUNT` e `GROUP BY`.
         3.  **Performance:** Utilização da tabela pré-calculada `despesas_agregadas` para análises geográficas (UF), reduzindo a carga de processamento no banco.
 
+### 7. Desenvolvimento da API (Backend)
+
+* **Framework Escolhido:**
+    * **Decisão:** **FastAPI**.
+    * **Justificativa (vs Flask):** O FastAPI oferece validação de dados nativa (Pydantic), geração automática de documentação (Swagger UI) e performance superior (ASGI) com menos código boilerplate que o Flask. Para um prazo curto de 7 dias, a produtividade do FastAPI é decisiva.
+
+* **Estratégia de Paginação:**
+    * **Decisão:** **Limit/Offset** (via parâmetros `limit` na query).
+    * **Justificativa:** É a abordagem mais simples e universalmente entendida para tabelas de tamanho moderado. Embora "Cursor-based" seja mais performática para milhões de registros, adicionaria complexidade desnecessária ao Frontend para o volume atual (~700 operadoras).
+
+* **Estrutura de Resposta:**
+    * **Decisão:** Retorno de Lista Simples (`[{...}]`).
+    * **Justificativa (KISS):** Optei por uma estrutura plana para facilitar o consumo imediato pelo Frontend (Vue.js), evitando a necessidade de desaninhamento de objetos (`response.data.data`).
+
+* **Estratégia de Cache:**
+    * **Decisão:** Queries Diretas (Sem Cache).
+    * **Justificativa:** Os dados de demonstrações contábeis são trimestrais (atualização muito baixa). A complexidade de implementar um Redis ou Memcached não se justifica dado que o banco PostgreSQL local responde em milissegundos para este volume de dados.
+
