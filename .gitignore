@@ -5,3 +5,21 @@ data/
 *.zip
 *.csv
 .vscode/
+
+# Ignorar arquivos do sistema
+.DS_Store
+Thumbs.db
+
+# Ignorar ambientes virtuais Python
+venv/
+__pycache__/
+*.pyc
+
+# Ignorar dependências do Node (Frontend)
+node_modules/
+frontend/node_modules/
+.vite/
+dist/
+
+# Ignorar arquivos de log
+*.log
