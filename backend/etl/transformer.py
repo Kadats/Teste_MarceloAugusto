@@ -97,11 +97,15 @@ def run_transformation():
     if not cadop_path: return
 
     print("📖 Lendo Cadastro de Operadoras...")
-    # Tenta ler ignorando erros de linha ruim (comum em arquivos gov)
+    
+    # Tenta ler primeiro como UTF-8 (Padrão moderno)
     try:
+        df_cadop = pd.read_csv(cadop_path, sep=';', encoding='utf-8', dtype=str, on_bad_lines='skip')
+        print("   ✅ Arquivo lido como UTF-8.")
+    except UnicodeDecodeError:
+        # Se falhar, tenta como Latin-1 (Padrão antigo/Windows)
+        print("   ⚠️ UTF-8 falhou, tentando fallback para Latin-1...")
         df_cadop = pd.read_csv(cadop_path, sep=';', encoding='latin1', dtype=str, on_bad_lines='skip')
-    except:
-        df_cadop = pd.read_csv(cadop_path, encoding='latin1', dtype=str, on_bad_lines='skip')
     
     # Normaliza nomes das colunas (remove espaços e poe em maiúsculo)
     df_cadop.columns = [c.strip().upper() for c in df_cadop.columns]
