@@ -5,7 +5,7 @@ import os
 # Configurações do Banco (Iguais ao docker-compose)
 DB_USER = "user_ans"
 DB_PASS = "password_ans"
-DB_HOST = "localhost" # Como estamos no WSL e Docker Desktop, localhost funciona
+DB_HOST = os.getenv("DB_HOST", "localhost")
 DB_PORT = "5432"
 DB_NAME = "ans_database"
 

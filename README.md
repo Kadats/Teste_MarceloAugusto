@@ -6,20 +6,48 @@
 
 ## Como Executar
 
-### Pré-requisitos
-- Python 3.12+
-- Docker (Opcional)
+### Opção 1: Via Docker (Recomendado)
+Esta é a forma mais simples, pois não requer instalação de Python ou Node.js na sua máquina, apenas o Docker.
 
-### Instalação e Execução
-1. Clone o repositório.
-2. Acesse a pasta `backend` e configure o ambiente:
-   ```bash
-   cd backend
-   python -m venv venv
-   source venv/bin/activate
-   pip install -r requirements.txt
-   python main.py
-   ```
+1.  **Clone o repositório** e entre na pasta.
+2.  **Suba o ambiente:**
+    ```bash
+    docker compose up --build
+    ```
+    *(Aguarde o build dos containers. Isso pode levar alguns minutos na primeira vez).*
+
+3.  **Acesse:**
+    * **Dashboard (Frontend):** [http://localhost:5173](http://localhost:5173)
+    * **Documentação da API:** [http://localhost:8000/docs](http://localhost:8000/docs)
+
+---
+
+### Opção 2: Execução Manual (Local)
+
+**Pré-requisitos:** Python 3.12+, Node.js 20+, PostgreSQL rodando localmente.
+
+1.  **Backend:**
+    ```bash
+    cd backend
+    python -m venv venv
+    source venv/bin/activate
+    pip install -r requirements.txt
+    
+    # Rodar Pipeline de Dados
+    python main.py
+    
+    # Rodar Servidor da API
+    uvicorn api.main:app --reload
+    ```
+
+2.  **Frontend:**
+    ```bash
+    cd frontend
+    npm install
+    npm run dev
+    ```
+
+---
 
 ## Decisões Técnicas (Trade-offs)
 
