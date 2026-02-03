@@ -4,11 +4,11 @@ import os
 
 # Configurações do Banco
 # IMPORTANTE: No Docker, o host é 'db'. Localmente, é 'localhost'.
-DB_USER = "user_ans"
-DB_PASS = "password_ans"
-DB_HOST = os.getenv("DB_HOST", "localhost") 
-DB_PORT = "5432"
-DB_NAME = "ans_database"
+DB_USER = os.getenv("DB_USER", "user_ans")
+DB_PASS = os.getenv("DB_PASS", "password_ans")
+DB_HOST = os.getenv("DB_HOST", "localhost")
+DB_PORT = os.getenv("DB_PORT", "5432")
+DB_NAME = os.getenv("DB_NAME", "ans_database")
 
 # String de Conexão
 DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"

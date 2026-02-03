@@ -2,13 +2,13 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
-# Configurações (Mesmas do importer.py)
-# Em produção, usaríamos variáveis de ambiente (.env), mas vamos manter hardcoded pro teste (KISS)
-DB_USER = "user_ans"
-DB_PASS = "password_ans"
+# Configurações com Segurança (Lê do Sistema ou usa Padrão)
+DB_USER = os.getenv("DB_USER", "user_ans")
+DB_PASS = os.getenv("DB_PASS", "password_ans")
 DB_HOST = os.getenv("DB_HOST", "localhost")
-DB_PORT = "5432"
-DB_NAME = "ans_database"
+DB_PORT = os.getenv("DB_PORT", "5432")
+DB_NAME = os.getenv("DB_NAME", "ans_database")
+
 DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
 # Cria o motor de conexão
