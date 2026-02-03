@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Depends, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from typing import List, Optional
@@ -9,6 +10,20 @@ app = FastAPI(
     title="API Intuitive Care - Teste Marcelo",
     description="API para consulta de despesas de operadoras de saúde (ANS).",
     version="1.0.0"
+)
+
+# --- CONFIGURAÇÃO DO CORS ---
+origins = [
+    "http://localhost:5173", # Porta padrão do Vite (Frontend)
+    "http://127.0.0.1:5173",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"], # Permite GET, POST, PUT, DELETE...
+    allow_headers=["*"],
 )
 
 # --- Schemas (Modelos de Resposta - O contrato da API) ---

@@ -118,3 +118,15 @@
     * **Decisão:** Queries Diretas (Sem Cache).
     * **Justificativa:** Os dados de demonstrações contábeis são trimestrais (atualização muito baixa). A complexidade de implementar um Redis ou Memcached não se justifica dado que o banco PostgreSQL local responde em milissegundos para este volume de dados.
 
+### 7. Interface Web (Frontend)
+
+* **Tecnologias:**
+    * **Vue.js 3 + Vite:** Escolha moderna que garante performance de build e carregamento instantâneo.
+    * **Chart.js:** Biblioteca madura para visualização de dados (Gráfico de Barras).
+    * **Axios:** Cliente HTTP para comunicação assíncrona com a API Python.
+
+* **Funcionalidades:**
+    * **Busca Reativa:** O campo de pesquisa filtra a tabela em tempo real, disparando requisições otimizadas para o Backend.
+    * **Dashboard Visual:** Apresentação gráfica das 10 maiores despesas para rápida tomada de decisão executiva.
+    * **Design Limpo:** Interface focada na usabilidade, sem poluição visual.
+
