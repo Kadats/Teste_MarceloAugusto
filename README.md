@@ -1,170 +1,90 @@
-# Teste Técnico - Intuitive Care
+# 🏥 Monitor de Despesas - Dados Abertos ANS
 
-## Autor
-**Nome:** Marcelo Augusto
-**Status:** Em desenvolvimento
+> Teste Técnico para Engenharia de Dados / Full Stack - Intuitive Care
 
-## Como Executar
-
-### Opção 1: Via Docker (Recomendado)
-Esta é a forma mais simples, pois não requer instalação de Python ou Node.js na sua máquina, apenas o Docker.
-
-### Instalação e Execução (Via Docker)
-
-1.  **Clone o repositório** e entre na pasta.
-
-2.  **Suba os containers:**
-    ```bash
-    docker compose up --build -d
-    ```
-    *(O `-d` roda em segundo plano para liberar seu terminal).*
-
-3.  **Popule o Banco de Dados (ETL):**
-    ⚠️ **Passo Obrigatório:** Como o banco nasce vazio, execute o comando abaixo para baixar e processar os dados da ANS.
-    ```bash
-    docker compose exec backend python main.py
-    ```
-    *Aguarde a mensagem "SUCESSO! Pipeline finalizado".*
-
-4.  **Acesse:**
-    * **Dashboard:** [http://localhost:5173](http://localhost:5173)
-    * **API Docs:** [http://localhost:8000/docs](http://localhost:8000/docs)
+Este projeto é uma solução completa (End-to-End) para coleta, processamento, análise e visualização das despesas de Operadoras de Planos de Saúde, utilizando dados públicos da Agência Nacional de Saúde Suplementar (ANS).
 
 ---
 
-### Opção 2: Execução Manual (Local)
+## 🚀 Tecnologias Utilizadas
 
-**Pré-requisitos:** Python 3.12+, Node.js 20+, PostgreSQL rodando localmente.
+### Backend & Engenharia de Dados
+* **Linguagem:** Python 3.12
+* **Framework API:** FastAPI (Alta performance e documentação automática)
+* **Banco de Dados:** PostgreSQL
+* **ETL & Análise:** Pandas, SQLAlchemy, BeautifulSoup4
+* **Infraestrutura:** Docker & Docker Compose
 
-1.  **Backend:**
-    ```bash
-    cd backend
-    python -m venv venv
-    source venv/bin/activate
-    pip install -r requirements.txt
-    
-    # Rodar Pipeline de Dados
-    python main.py
-    
-    # Rodar Servidor da API
-    uvicorn api.main:app --reload
-    ```
-
-2.  **Frontend:**
-    ```bash
-    cd frontend
-    npm install
-    npm run dev
-    ```
+### Frontend
+* **Framework:** Vue.js 3 (Composition API)
+* **Build Tool:** Vite
+* **Visualização:** Chart.js (Vue-Chartjs)
+* **Cliente HTTP:** Axios
 
 ---
 
-## Decisões Técnicas (Trade-offs)
+## 🛠️ Como Executar o Projeto
 
-### 1. Coleta de Dados (Scraper)
+A maneira recomendada de executar a aplicação é utilizando **Docker**, garantindo que todo o ambiente (Banco, API e Interface) suba com um único comando, isolado do seu sistema operacional.
 
-* **Escolha da Biblioteca: `BeautifulSoup` vs `Selenium`**
-    * **Decisão:** Utilizei `BeautifulSoup` + `requests`.
-    * **Justificativa:** O site da ANS é estático (não depende de JavaScript para carregar os arquivos). O `BeautifulSoup` é muito mais leve e rápido, consumindo menos recursos da máquina do que abrir um navegador simulado com Selenium. Isso torna o processo de coleta mais eficiente.
+### Passo 1: Subir o Ambiente
+No terminal, na raiz do projeto, execute:
 
-* **Estratégia de Processamento: Disco vs Memória**
-    * **Decisão:** Baixar os arquivos ZIP para o disco (`data/raw`) antes de processar.
-    * **Justificativa:** Arquivos contábeis podem ser grandes. Tentar baixar, descompactar e ler tudo na memória RAM simultaneamente poderia travar o sistema (estouro de memória). Salvar em disco cria um *checkpoint*: se o processamento falhar, não precisamos baixar tudo novamente, garantindo maior resiliência.
+```bash
+docker compose up --build -d
+```
+*Aguarde alguns instantes para o build dos containers e inicialização do banco.*
 
-### 2. Processamento e Consolidação (ETL)
+### Passo 2: Popular o Banco de Dados (Pipeline ETL)
+Como o banco de dados inicia vazio, é necessário rodar o orquestrador para baixar e processar os dados da ANS:
 
-* **Abordagem de Resiliência:**
-    * Em vez de assumir nomes de arquivos fixos (ex: `1T2025.csv`), implementei uma inspeção automática do conteúdo dos arquivos ZIP.
-    * O script abre os arquivos em memória, verifica as primeiras linhas e identifica as colunas chave (`DATA`, `DESCRICAO`, `VL_SALDO_FINAL`) para decidir qual arquivo processar.
-    * Isso torna o sistema capaz de lidar com arquivos `.csv`, `.txt` ou `.xlsx` automaticamente.
+```bash
+docker compose exec backend python main.py
+```
+*O sistema fará o download dos arquivos, correção de encoding, transformação e carga no PostgreSQL. Aguarde a mensagem "SUCESSO".*
 
-* **Filtros Aplicados:**
-    * Filtragem de linhas onde a coluna `DESCRICAO` contém os termos "EVENTO" ou "SINISTRO" (Case Insensitive), conforme solicitado no desafio.
+### Passo 3: Acessar a Aplicação
+* **Dashboard:** [http://localhost:5173](http://localhost:5173)
+* **API Docs:** [http://localhost:8000/docs](http://localhost:8000/docs)
 
-* **⚠️ Inconsistência Detectada (Análise Crítica):**
-    * **Problema:** Os arquivos de Demonstrações Contábeis da ANS (fonte 1.1) **não contêm** as colunas `CNPJ` ou `Razão Social`, apenas o código `REG_ANS`.
-    * **Solução Adotada:** Para manter a integridade do teste, realizei a consolidação mantendo a coluna `RegistroANS`.
-    * **Próximo Passo:** O enriquecimento com CNPJ e Razão Social será feito na etapa 2.2, através do cruzamento (Join) com a base de Dados Cadastrais das Operadoras.
 
-### 3. Transformação e Enriquecimento de Dados
+---
 
-* **Estratégia de Join (Desafio Técnico):**
-    * O PDF solicita o cruzamento por `CNPJ`. No entanto, como a fonte primária (Demonstrações Contábeis) não possui CNPJ, utilizei o `RegistroANS` (código único da operadora) como chave de ligação (`Join Key`).
-    * Identifiquei e tratei divergências de tipagem (`int` vs `string`) e nomes de colunas dinâmicos (`REGISTRO_OPERADORA` vs `DATA_REGISTRO`) através de inspeção automática.
+## 🏗️ Arquitetura e Decisões Técnicas (Trade-offs)
+Para cumprir o prazo de 7 dias com máxima eficiência e qualidade, as seguintes decisões arquiteturais foram tomadas:
 
-* **Validação e Tratamento de Qualidade (Data Quality):**
-    * **Validação:** Implementei o algoritmo de *Módulo 11* para verificar a validade matemática dos CNPJs após o enriquecimento.
-    * **Estratégia de "Quarentena" (Trade-off):**
-        * *Decisão:* Ao invés de descartar registros com CNPJs inválidos ou sem correspondência no cadastro, optei por **separar os dados**.
-        * *Fluxo:*
-            * ✅ Dados Válidos -> `data/processed/despesas_enriquecidas.csv` (Seguem para análise).
-            * ❌ Dados Inválidos -> `data/processed/inconsistencias.csv` (Seguem para auditoria).
-        * *Justificativa:* Em um contexto financeiro, descartar despesas apenas por erro cadastral geraria relatórios contábeis imprecisos (falso positivo de lucro). A segregação permite a continuidade da análise sem perder o rastro das inconsistências.
+### 1. Estratégia de Coleta (Scraper)
+* **BeautifulSoup vs Selenium:** Optei pelo `BeautifulSoup` + `requests`. Como o diretório FTP da ANS é estático, o uso de Selenium seria um desperdício de recursos (overhead de memória). A solução atual é leve e extremamente rápida.
 
-### 4. Agregação e Análise Estatística
+* **Armazenamento em Disco:** Os arquivos `.zip` são baixados para a pasta `/data` antes do processamento. Isso cria um checkpoint de segurança, evitando re-downloads em caso de falha no processamento, além de proteger a memória RAM contra estouros ao lidar com arquivos grandes.
 
-* **Granularidade:**
-    * A agregação foi realizada em dois níveis: primeiro somando as despesas por trimestre (visão temporal), e posteriormente calculando a média e desvio padrão por operadora (visão consolidada).
+### 2. Tratamento de Encoding (Desafio & Solução)
+* **O Problema:** Identifiquei que os arquivos CSV da ANS utilizam codificação antiga (**ISO-8859-1/Latin-1**), enquanto o ambiente Python/Linux moderno opera em **UTF-8**. Isso causava erros de "mojibake" (ex: "MÉDICA" virava "MÃDICA").
 
-* **Tratamento de Desvio Padrão (Trade-off Matemático):**
-    * **Problema:** Operadoras que possuem registro em apenas um trimestre resultam em `NaN` (Not a Number) ao calcular o desvio padrão (pois não há variância com um único ponto de dados).
-    * **Decisão:** Substituir esses valores `NaN` por `0.0`.
-    * **Justificativa:** Para fins de exibição no Frontend e armazenamento no Banco de Dados, `0.0` representa corretamente que "não houve variação registrada", evitando erros de tipagem ou valores nulos que quebrariam a interface.
+* **A Solução:** Implementei uma leitura resiliente ("Fallback Strategy") no pipeline. O sistema tenta ler em **UTF-8**; se falhar, reprocessa automaticamente forçando Latin-1. Isso garante a integridade dos nomes das operadoras no Dashboard final.
 
-### 5. Banco de Dados e Persistência
+### 3. API e Backend
+* **FastAPI vs Flask:** Escolhi FastAPI pela validação nativa de dados (Pydantic), performance assíncrona (ASGI) e geração automática do Swagger, acelerando o desenvolvimento e a documentação.
 
-* **Escolha do SGBD:**
-    * **Tecnologia:** PostgreSQL 15 (via Docker).
-    * **Justificativa:** O PostgreSQL é robusto, suporta nativamente tipos numéricos precisos (`NUMERIC`) para dados financeiros e possui excelente integração com Python/SQLAlchemy.
-    * **Infraestrutura:** Utilizei o **Docker Compose** para orquestrar o banco. Isso garante que qualquer pessoa que clone o repositório consiga subir o ambiente com um único comando (`docker compose up`), sem precisar instalar o Postgres localmente no sistema operacional, mantendo o ambiente de desenvolvimento limpo.
+* **Paginação:** Implementada via `Limit/Offset`. Para o volume atual de dados (~700 operadoras ativas), essa abordagem é simples e eficiente, evitando complexidade desnecessária no Frontend.
 
-* **Estratégia de Carga de Dados (Data Loading):**
-    * **Trade-off: Full Refresh vs. Incremental:**
-        * Optei pela estratégia de **Carga Total (Full Refresh)** com `TRUNCATE` antes da inserção.
-        * **Justificativa:** Para o escopo deste teste, garantir a consistência e a idempotência (poder rodar o script várias vezes e ter o mesmo resultado) é prioritário. Uma carga incremental exigiria verificação linha a linha (Upsert), o que adicionaria complexidade de processamento desnecessária dado o volume de dados (~170k registros).
+### 4. Interface Web (Frontend)
+* **Vue.js 3:** Escolhido pela reatividade e performance.
 
-* **Modelagem:**
-    * Criei três tabelas para atender aos requisitos:
-        1.  `operadoras`: Tabela dimensional (Dados cadastrais únicos).
-        2.  `despesas_detalhadas`: Tabela de fatos (Transações linha a linha).
-        3.  `despesas_agregadas`: Tabela de performance (Pré-calculada para consultas rápidas de Dashboards).
+* **Chart.js:** Utilizado para renderizar o gráfico das "Top 10 Despesas", oferecendo uma visualização clara para tomada de decisão executiva.
 
-### 6. Consultas Analíticas (SQL)
+---
 
-* **Abordagem:**
-    * As consultas solicitadas na Tarefa 3.1 foram consolidadas no arquivo `backend/database/queries.sql`.
-    * O arquivo contém queries que demonstram:
-        1.  **JOINs:** Cruzamento entre fatos (despesas) e dimensões (operadoras).
-        2.  **Agregações:** Uso de `SUM`, `AVG`, `COUNT` e `GROUP BY`.
-        3.  **Performance:** Utilização da tabela pré-calculada `despesas_agregadas` para análises geográficas (UF), reduzindo a carga de processamento no banco.
+## 🔮 Melhorias Futuras (Next Steps)
+Dado mais tempo para evolução do produto, os próximos passos seriam:
 
-### 7. Desenvolvimento da API (Backend)
+**1. Testes Automatizados:** Implementação de `pytest` para cobrir as regras de negócio do ETL (cálculo de média e desvio padrão) e Mocks para testar o Scraper sem depender da disponibilidade do site da ANS.
 
-* **Framework Escolhido:**
-    * **Decisão:** **FastAPI**.
-    * **Justificativa (vs Flask):** O FastAPI oferece validação de dados nativa (Pydantic), geração automática de documentação (Swagger UI) e performance superior (ASGI) com menos código boilerplate que o Flask. Para um prazo curto de 7 dias, a produtividade do FastAPI é decisiva.
+**2. Orquestração Profissional:** Migração do script `main.py` para Apache Airflow ou Prefect, permitindo agendamento diário e monitoramento visual de falhas no pipeline.
 
-* **Estratégia de Paginação:**
-    * **Decisão:** **Limit/Offset** (via parâmetros `limit` na query).
-    * **Justificativa:** É a abordagem mais simples e universalmente entendida para tabelas de tamanho moderado. Embora "Cursor-based" seja mais performática para milhões de registros, adicionaria complexidade desnecessária ao Frontend para o volume atual (~700 operadoras).
+**3. CI/CD:** Configuração de GitHub Actions para linting e testes a cada Push.
 
-* **Estrutura de Resposta:**
-    * **Decisão:** Retorno de Lista Simples (`[{...}]`).
-    * **Justificativa (KISS):** Optei por uma estrutura plana para facilitar o consumo imediato pelo Frontend (Vue.js), evitando a necessidade de desaninhamento de objetos (`response.data.data`).
+---
 
-* **Estratégia de Cache:**
-    * **Decisão:** Queries Diretas (Sem Cache).
-    * **Justificativa:** Os dados de demonstrações contábeis são trimestrais (atualização muito baixa). A complexidade de implementar um Redis ou Memcached não se justifica dado que o banco PostgreSQL local responde em milissegundos para este volume de dados.
-
-### 7. Interface Web (Frontend)
-
-* **Tecnologias:**
-    * **Vue.js 3 + Vite:** Escolha moderna que garante performance de build e carregamento instantâneo.
-    * **Chart.js:** Biblioteca madura para visualização de dados (Gráfico de Barras).
-    * **Axios:** Cliente HTTP para comunicação assíncrona com a API Python.
-
-* **Funcionalidades:**
-    * **Busca Reativa:** O campo de pesquisa filtra a tabela em tempo real, disparando requisições otimizadas para o Backend.
-    * **Dashboard Visual:** Apresentação gráfica das 10 maiores despesas para rápida tomada de decisão executiva.
-    * **Design Limpo:** Interface focada na usabilidade, sem poluição visual.
-
+## 👨‍💻 Autor
+### Marcelo Augusto
