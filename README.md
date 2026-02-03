@@ -9,16 +9,26 @@
 ### Opção 1: Via Docker (Recomendado)
 Esta é a forma mais simples, pois não requer instalação de Python ou Node.js na sua máquina, apenas o Docker.
 
-1.  **Clone o repositório** e entre na pasta.
-2.  **Suba o ambiente:**
-    ```bash
-    docker compose up --build
-    ```
-    *(Aguarde o build dos containers. Isso pode levar alguns minutos na primeira vez).*
+### Instalação e Execução (Via Docker)
 
-3.  **Acesse:**
-    * **Dashboard (Frontend):** [http://localhost:5173](http://localhost:5173)
-    * **Documentação da API:** [http://localhost:8000/docs](http://localhost:8000/docs)
+1.  **Clone o repositório** e entre na pasta.
+
+2.  **Suba os containers:**
+    ```bash
+    docker compose up --build -d
+    ```
+    *(O `-d` roda em segundo plano para liberar seu terminal).*
+
+3.  **Popule o Banco de Dados (ETL):**
+    ⚠️ **Passo Obrigatório:** Como o banco nasce vazio, execute o comando abaixo para baixar e processar os dados da ANS.
+    ```bash
+    docker compose exec backend python main.py
+    ```
+    *Aguarde a mensagem "SUCESSO! Pipeline finalizado".*
+
+4.  **Acesse:**
+    * **Dashboard:** [http://localhost:5173](http://localhost:5173)
+    * **API Docs:** [http://localhost:8000/docs](http://localhost:8000/docs)
 
 ---
 
