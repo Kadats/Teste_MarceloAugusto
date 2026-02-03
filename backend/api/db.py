@@ -1,3 +1,4 @@
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
@@ -5,7 +6,7 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 # Em produção, usaríamos variáveis de ambiente (.env), mas vamos manter hardcoded pro teste (KISS)
 DB_USER = "user_ans"
 DB_PASS = "password_ans"
-DB_HOST = "localhost"
+DB_HOST = os.getenv("DB_HOST", "localhost")
 DB_PORT = "5432"
 DB_NAME = "ans_database"
 DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"

@@ -1,9 +1,10 @@
 version: '3.8'
 
 services:
+  # --- 1. Banco de Dados (PostgreSQL) ---
   db:
     image: postgres:15-alpine
-    container_name: postgres_ans
+    container_name: intuitive_db
     environment:
       POSTGRES_USER: user_ans
       POSTGRES_PASSWORD: password_ans
@@ -12,7 +13,41 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user_ans -d ans_database"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # --- 2. Backend (API Python) ---
+  backend:
+    build: ./backend
+    container_name: intuitive_backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Sobrescrevemos o HOST do banco para usar o nome do container 'db'
+      DB_HOST: db 
+    ports:
+      - "8000:8000"
+    volumes:
+      # Monta a pasta data para persistir os downloads
+      - ./data:/data
+
+  # --- 3. Frontend (Vue.js) ---
+  frontend:
+    build: ./frontend
+    container_name: intuitive_frontend
+    depends_on:
+      - backend
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    volumes:
+      # Hot-reload: se você mudar arquivo no PC, muda no docker
+      - ./frontend/src:/app/src 
 
 volumes:
   postgres_data:
-
