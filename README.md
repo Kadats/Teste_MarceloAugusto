@@ -91,3 +91,12 @@
         2.  `despesas_detalhadas`: Tabela de fatos (Transações linha a linha).
         3.  `despesas_agregadas`: Tabela de performance (Pré-calculada para consultas rápidas de Dashboards).
 
+### 6. Consultas Analíticas (SQL)
+
+* **Abordagem:**
+    * As consultas solicitadas na Tarefa 3.1 foram consolidadas no arquivo `backend/database/queries.sql`.
+    * O arquivo contém queries que demonstram:
+        1.  **JOINs:** Cruzamento entre fatos (despesas) e dimensões (operadoras).
+        2.  **Agregações:** Uso de `SUM`, `AVG`, `COUNT` e `GROUP BY`.
+        3.  **Performance:** Utilização da tabela pré-calculada `despesas_agregadas` para análises geográficas (UF), reduzindo a carga de processamento no banco.
+
