@@ -1,0 +1,107 @@
+{
+    "info": {
+        "_postman_id": "intuitive-care-test-export",
+        "name": "Intuitive Care - Despesas ANS",
+        "description": "Collection para teste t\u00e9cnico de Engenharia de Dados/Full Stack.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "1. Health Check",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "http://localhost:8000/",
+                    "protocol": "http",
+                    "host": [
+                        "localhost"
+                    ],
+                    "port": "8000",
+                    "path": [
+                        ""
+                    ]
+                }
+            }
+        },
+        {
+            "name": "2. Listar Operadoras (Busca)",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "http://localhost:8000/operadoras?busca=AMIL&limit=10&offset=0",
+                    "protocol": "http",
+                    "host": [
+                        "localhost"
+                    ],
+                    "port": "8000",
+                    "path": [
+                        "operadoras"
+                    ],
+                    "query": [
+                        {
+                            "key": "busca",
+                            "value": "AMIL",
+                            "description": "Filtro por nome ou registro"
+                        },
+                        {
+                            "key": "limit",
+                            "value": "10"
+                        },
+                        {
+                            "key": "offset",
+                            "value": "0"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name": "3. Detalhe de Despesas (Lista)",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "http://localhost:8000/operadoras/326305/despesas?ano=2023",
+                    "protocol": "http",
+                    "host": [
+                        "localhost"
+                    ],
+                    "port": "8000",
+                    "path": [
+                        "operadoras",
+                        "326305",
+                        "despesas"
+                    ],
+                    "query": [
+                        {
+                            "key": "ano",
+                            "value": "2023",
+                            "description": "Filtro opcional de ano"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name": "4. Top 10 Despesas (Dashboard)",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "http://localhost:8000/despesas/top-10",
+                    "protocol": "http",
+                    "host": [
+                        "localhost"
+                    ],
+                    "port": "8000",
+                    "path": [
+                        "despesas",
+                        "top-10"
+                    ]
+                }
+            }
+        }
+    ]
+}
